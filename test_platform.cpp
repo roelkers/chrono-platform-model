@@ -6,10 +6,11 @@
 #include "chrono/physics/ChSystem.h"
 #include "chrono_fea/ChVisualizationFEAmesh.h"
 #include <chrono_irrlicht/ChIrrTools.h>
+#include <chrono_irrlicht/ChIrrCamera.h>
 
 #include "params.h"
 #include "defineParameters.h"
-#include "platformModel.h"
+#include "PlatformModel.h"
 
 using namespace chrono;
 using namespace chrono::fea;
@@ -31,7 +32,7 @@ int main(int argc, char* argv[]) {
     application.AddTypicalLogo();
     application.AddTypicalSky();
     application.AddTypicalLights();
-    application.AddTypicalCamera(core::vector3df(100.f, 0.6f, -1.f));
+    application.AddTypicalCamera(core::vector3df(100.f, 0.6f, -1.f)); //camera position
 
     // Create a mesh, that is a container for groups of elements and
     // their referenced nodes.
@@ -40,7 +41,7 @@ int main(int argc, char* argv[]) {
     //define parameters
     params p = defineParameters();
 
-    platformModel(my_system, my_mesh, p);
+    PlatformModel model(my_system, my_mesh, p);
 
     // Remember to add the mesh to the system!
     my_system.Add(my_mesh);
@@ -68,6 +69,18 @@ int main(int argc, char* argv[]) {
     mvisualizebeamC->SetZbufferHide(false);
     my_mesh->AddAsset(mvisualizebeamC);
 
+    //Set "UP"-direction of ChCamera
+
+    auto device = application.GetDevice();
+    RTSCamera* camera = new RTSCamera(device, device->getSceneManager()->getRootSceneNode(), device->getSceneManager(),
+                                      -1, -160.0f, 1.0f, 0.003f);
+
+    camera->setPosition(irr::core::vector3df(100.f, 0.6f, -1.f));
+    camera->setTarget(irr::core::vector3df(0.f, 0.f, 0.f));
+    camera->setUpVector(irr::core::vector3df(0.f, 0.f, 100.f));
+    camera->setNearValue(0.1f);
+    camera->setMinZoom(0.6f);
+
     // ==IMPORTANT!== Use this function for adding a ChIrrNodeAsset to all items
     // in the system. These ChIrrNodeAsset assets are 'proxies' to the Irrlicht meshes.
     // If you need a finer control on which item really needs a visualization proxy in
@@ -81,9 +94,6 @@ int main(int argc, char* argv[]) {
     // Mark completion of system construction
     my_system.SetupInitial();
 
-    //ChIrrAppTools
-    ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);
-    ChIrrTools::drawAllLinkframes(my_system,application.GetVideoDriver(),100);
 
     // Change solver settings
     my_system.SetSolverType(ChSolver::Type::MINRES);
@@ -114,6 +124,9 @@ int main(int argc, char* argv[]) {
     while (application.GetDevice()->run()) {
         application.BeginScene();
         application.DrawAll();
+        //ChIrrAppTools
+        //ChIrrTools::drawAllLinkframes(my_system,application.GetVideoDriver(),100);
+        ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);
         application.DoStep();
         application.EndScene();
     }

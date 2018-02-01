@@ -90,7 +90,7 @@ IF(ENABLE_MODULE_IRRLICHT)
 
         SET(SOURCE_FILES
           test_platform.cpp
-          platformModel.cpp
+          PlatformModel.cpp
           defineParameters.cpp
         )
 
