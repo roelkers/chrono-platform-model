@@ -12,12 +12,14 @@ struct params{
   ChVector<> towerInitPos;
   ChVector<> towerInitDir;
 
+  int mooringLineNr;
   double mooringDiameter;
   double mooringYoungModulus;
   double mooringRaleyghDamping;
   int mooringNrElements;
   double mooringL;
-  double mooringPosZ;
+  double mooringPosFairleadZ;
+  double mooringPosBottomZ;
 };
 
 #endif

@@ -44,53 +44,21 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       constraint_dir->SetDirectionInAbsoluteCoords(ChVector<>(0, 0, 1));
       system.Add(constraint_dir);
       */
+
       //Add Gravity
       system.Set_G_acc(ChVector<>(0,0,-9.8));
 
-      // Mooring Lines
-      sectionCable = std::make_shared<ChBeamSectionCable>();
-      sectionCable->SetDiameter(p.mooringDiameter);
-      sectionCable->SetYoungModulus(p.mooringYoungModulus);
-      sectionCable->SetBeamRaleyghDamping(p.mooringRaleyghDamping);
+      //Angular increment of Mooring Line on Monopile
+      double thetaInc = 360/p.mooringLineNr;
+      //Angle on Monopile of mooring line
+      double theta = 0;
+      //Construct Mooring Lines
+      for(int i = 0; i < p.mooringLineNr; i++){
+        theta = theta + thetaInc;
 
-      //for(int i = 0; i < 2; i++){
-        // Shortcut!
-        // This ChBuilderBeamANCF helper object is very useful because it will
-        // subdivide 'beams' into sequences of finite elements of beam type, ex.
-        // one 'beam' could be made of 5 FEM elements of ChElementBeamANCF class.
-        // If new nodes are needed, it will create them for you.
-        ChBuilderBeamANCF builder;
-
-        // Now, simply use BuildBeam to create a beam from a point to another:
-        builder.BuildBeam(mesh,                       // the mesh where to put the created nodes and elements
-                          sectionCable,            // the ChBeamSectionCable to use for the ChElementBeamANCF elements
-                          p.mooringNrElements,      // the number of ChElementBeamANCF to create
-                          ChVector<>(0, 0, p.mooringPosZ),     // the 'A' point in space (beginning of beam)
-                          ChVector<>(0, p.mooringL,p.mooringPosZ));  // the 'B' point in space (end of beam)
-
-        // After having used BuildBeam(), you can retrieve the nodes used for the beam,
-        // For example say you want to fix both pos and dir of A end and apply a force to the B end:
-        // builder.GetLastBeamNodes().back()->SetFixed(true);
-        // builder.GetLastBeamNodes().front()->SetForce(ChVector<>(0, -0.2, 0));
-
-        // For instance, now retrieve the A end and add a constraint to
-        // block the position only of that node:
-        auto mtruss = std::make_shared<ChBody>();
-        mtruss->SetBodyFixed(true);
-
-        //fairleads constraint
-        auto constraint_pos2 = std::make_shared<ChLinkPointFrame>();
-        constraint_pos2->Initialize(builder.GetLastBeamNodes().front(), monopile);
-        system.Add(constraint_pos2);
-
-        auto constraint_dir2 = std::make_shared<ChLinkDirFrame>();
-        constraint_dir2->Initialize(builder.GetLastBeamNodes().front(), monopile);
-        constraint_dir2->SetDirectionInAbsoluteCoords(ChVector<>(1, 0, 0));
-        system.Add(constraint_dir2);
-
-        //anchor constraint
-        auto constraint_hinge = std::make_shared<ChLinkPointFrame>();
-        constraint_hinge->Initialize(builder.GetLastBeamNodes().back(), mtruss);
-        system.Add(constraint_hinge);
-
+        GetLog() << "Mooring Line Angular position: " << theta << "deg\n";
+        GetLog() << "Constructing mooring line " << i << "\n";
+        MooringLine mLine(system, mesh, p, theta, monopile);
+        mooringLines[i] = mLine;
+      }
 }

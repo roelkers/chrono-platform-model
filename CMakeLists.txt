@@ -92,6 +92,7 @@ IF(ENABLE_MODULE_IRRLICHT)
           test_platform.cpp
           PlatformModel.cpp
           defineParameters.cpp
+          MooringLine.cpp
         )
 
         ADD_EXECUTABLE(${PROGRAM}  ${SOURCE_FILES})

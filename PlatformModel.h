@@ -7,6 +7,8 @@
 #include "chrono_fea/ChBuilderBeam.h"
 #include "chrono_fea/ChMesh.h"
 #include "chrono_fea/ChElementCableANCF.h"
+
+#include "MooringLine.h"
 #include "params.h"
 
 using namespace chrono;
@@ -18,7 +20,6 @@ class PlatformModel{
     std::shared_ptr<ChNodeFEAxyzD> monopileInitNode;
     std::shared_ptr<ChBodyEasyCylinder> monopile;
 
-    std::shared_ptr<ChBeamSectionCable> sectionCable;
     std::vector<MooringLine> mooringLines;
 
   public:
