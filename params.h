@@ -20,6 +20,7 @@ struct params{
   double mooringL;
   double mooringPosFairleadZ;
   double mooringPosBottomZ;
+  double mooringRestLength;
 };
 
 #endif

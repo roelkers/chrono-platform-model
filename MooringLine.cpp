@@ -39,25 +39,28 @@ MooringLine::MooringLine(ChSystem& system, std::shared_ptr<ChMesh> mesh, params 
     sectionCable,            // the ChBeamSectionCable to use for the ChElementBeamANCF elements
     p.mooringNrElements,      // the number of ChElementBeamANCF to create
     ChVector<>(xStart, yStart, p.mooringPosFairleadZ),     // the 'A' point in space (beginning of beam)
-    ChVector<>(xEnd, yEnd, p.mooringPosBottomZ));  // the 'B' point in space (end of beam)
+    ChVector<>(xEnd, yEnd, p.mooringPosBottomZ)
+  );  // the 'B' point in space (end of beam)
 
-    // After having used BuildBeam(), you can retrieve the nodes used for the beam,
-    // For example say you want to fix both pos and dir of A end and apply a force to the B end:
-    // builder.GetLastBeamNodes().back()->SetFixed(true);
-    // builder.GetLastBeamNodes().front()->SetForce(ChVector<>(0, -0.2, 0));
 
-    // For instance, now retrieve the A end and add a constraint to
-    // block the position only of that node:
-    auto mtruss = std::make_shared<ChBody>();
-    mtruss->SetBodyFixed(true);
-
-    //fairleads constraint
-    auto constraint_pos2 = std::make_shared<ChLinkPointFrame>();
-    constraint_pos2->Initialize(builder.GetLastBeamNodes().front(), monopile);
-    system.Add(constraint_pos2);
-
-    //anchor constraint
-    auto constraint_hinge = std::make_shared<ChLinkPointFrame>();
-    constraint_hinge->Initialize(builder.GetLastBeamNodes().back(), mtruss);
-    system.Add(constraint_hinge);
+  //Iterate over beam elements to set the rest length (lenth at rest position)
+  std::vector<std::shared_ptr<ChElementCableANCF>> beamElements = builder.GetLastBeamElements();
+  for(auto &element : beamElements){
+    element->SetRestLength(p.mooringRestLength);
   }
+
+  // For instance, now retrieve the A end and add a constraint to
+  // block the position only of that node:
+  auto mtruss = std::make_shared<ChBody>();
+  mtruss->SetBodyFixed(true);
+
+  //fairleads constraint
+  auto constraint_pos2 = std::make_shared<ChLinkPointFrame>();
+  constraint_pos2->Initialize(builder.GetLastBeamNodes().front(), monopile);
+  system.Add(constraint_pos2);
+
+  //anchor constraint
+  auto constraint_hinge = std::make_shared<ChLinkPointFrame>();
+  constraint_hinge->Initialize(builder.GetLastBeamNodes().back(), mtruss);
+  system.Add(constraint_hinge);
+}

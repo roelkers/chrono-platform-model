@@ -18,5 +18,9 @@ params defineParameters(){
   p.mooringL = 100;
   p.mooringPosFairleadZ = 25;
   p.mooringPosBottomZ = 10;
+
+  double sectionLength = p.mooringL/p.mooringNrElements;
+  p.mooringRestLength = sectionLength*0.5;
+
   return p;
 }
