@@ -17,11 +17,11 @@ using namespace chrono::fea;
 PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, params p) {
 
       //Monopile
-      auto node1 = std::make_shared<ChNodeFEAxyzD>(p.towerInitPos, p.towerInitDir);
-      mesh->AddNode(node1);
+      monopileInitNode = std::make_shared<ChNodeFEAxyzD>(p.towerInitPos, p.towerInitDir);
+      mesh->AddNode(monopileInitNode);
 
       monopile = std::make_shared<ChBodyEasyCylinder>(p.towerRadius,p.towerHeight,p.towerDensity);
-      monopile->SetPos(node1->GetPos());
+      monopile->SetPos(monopileInitNode->GetPos());
 
       //Rotate around x axis to align tower with z axis
       ChQuaternion<> q = Q_from_AngAxis(90 * CH_C_DEG_TO_RAD, VECT_X);
@@ -30,19 +30,20 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       system.Add(monopile);
 
       //Constraints
-      node1->SetFixed(true);
 
       GetLog() << "monopile initial position:" << monopile->GetPos() << "\n";
 
-      auto constraint_pos = std::make_shared<ChLinkPointFrame>();
-      constraint_pos->Initialize(node1,monopile);
-      //system.Add(constraint_pos);
+      //Fix Monopile in space
+      /*auto constraint_pos = std::make_shared<ChLinkPointFrame>();
+      monopileInitNode->SetFixed(true);
+      constraint_pos->Initialize(monopileInitNode,monopile);
+      system.Add(constraint_pos);
 
       auto constraint_dir = std::make_shared<ChLinkDirFrame>();
-      constraint_dir->Initialize(node1,monopile);
+      constraint_dir->Initialize(monopileInitNode,monopile);
       constraint_dir->SetDirectionInAbsoluteCoords(ChVector<>(0, 0, 1));
       system.Add(constraint_dir);
-
+      */
       //Add Gravity
       system.Set_G_acc(ChVector<>(0,0,-9.8));
 

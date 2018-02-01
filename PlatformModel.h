@@ -15,8 +15,11 @@ using namespace chrono::fea;
 class PlatformModel{
 
   private:
+    std::shared_ptr<ChNodeFEAxyzD> monopileInitNode;
     std::shared_ptr<ChBodyEasyCylinder> monopile;
+
     std::shared_ptr<ChBeamSectionCable> sectionCable;
+    std::vector<MooringLine> mooringLines;
 
   public:
     PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, params p);
