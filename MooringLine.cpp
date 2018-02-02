@@ -42,11 +42,12 @@ MooringLine::MooringLine(ChSystem& system, std::shared_ptr<ChMesh> mesh, params 
     ChVector<>(xEnd, yEnd, p.mooringPosBottomZ)
   );  // the 'B' point in space (end of beam)
 
-
   //Iterate over beam elements to set the rest length (lenth at rest position)
   std::vector<std::shared_ptr<ChElementCableANCF>> beamElements = builder.GetLastBeamElements();
   for(auto &element : beamElements){
+    //GetLog() << "Prev:RestLength: " << element->GetRestLength() << "\n";
     element->SetRestLength(p.mooringRestLength);
+    //GetLog() << "Now:RestLength: " << element->GetRestLength() << "\n";
   }
 
   // For instance, now retrieve the A end and add a constraint to

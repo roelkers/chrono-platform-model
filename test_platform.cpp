@@ -7,6 +7,8 @@
 #include "chrono_fea/ChVisualizationFEAmesh.h"
 #include <chrono_irrlicht/ChIrrTools.h>
 #include <chrono_irrlicht/ChIrrCamera.h>
+#include <chrono/physics/ChLoadsBody.h>
+#include <chrono/physics/ChLoadContainer.h>
 
 #include "params.h"
 #include "defineParameters.h"
@@ -42,6 +44,7 @@ int main(int argc, char* argv[]) {
     params p = defineParameters();
 
     PlatformModel model(my_system, my_mesh, p);
+    std::shared_ptr<ChBodyEasyCylinder> monopile = model.getMonopile();
 
     // Remember to add the mesh to the system!
     my_system.Add(my_mesh);
@@ -91,9 +94,16 @@ int main(int argc, char* argv[]) {
     // that you added to the bodies into 3D shapes, they can be visualized by Irrlicht!
     application.AssetUpdateAll();
 
+    //Init Load container
+    auto mloadcontainer = std::make_shared<ChLoadContainer>();
+    my_system.Add(mloadcontainer);
+
     // Mark completion of system construction
     my_system.SetupInitial();
 
+    //auto forcedNode = std::make_shared<ChNodeFEAxyz>(ChVector<>(0,0,0));
+    //my_mesh->AddNode(forcedNode);
+    //auto std::make_shared<ChLoadBodyForce> loadBodyForce;
 
     // Change solver settings
     my_system.SetSolverType(ChSolver::Type::MINRES);
@@ -124,8 +134,20 @@ int main(int argc, char* argv[]) {
     while (application.GetDevice()->run()) {
         application.BeginScene();
         application.DrawAll();
+        //Apply Force to Body
+        //forcedNode->SetX0(monopile->GetPos());
+        //forcedNode->SetForce(ChVector<>(500,0,0));
+        monopile->RemoveAllForces();
+        //auto forceVector = std::make_shared<ChVector> ChVector<>(500,0,0);
+        auto loadBodyForce = std::make_shared<ChLoadBodyForce> (
+          monopile, //body
+          ChVector<>(50000,-50000,50000), //force
+          false, //local_force
+          ChVector<>(0,0,0), //point
+          true //local point
+        );
+        mloadcontainer->Add(loadBodyForce);
         //ChIrrAppTools
-        //ChIrrTools::drawAllLinkframes(my_system,application.GetVideoDriver(),100);
         ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);
         application.DoStep();
         application.EndScene();

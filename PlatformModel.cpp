@@ -32,7 +32,7 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       //Constraints
 
       GetLog() << "monopile initial position:" << monopile->GetPos() << "\n";
-      GetLog() << "Rest Length" << p.mooringRestLength << "\n";
+      GetLog() << "Rest Length: " << p.mooringRestLength << "\n";
 
       //Fix Monopile in space
       /*auto constraint_pos = std::make_shared<ChLinkPointFrame>();

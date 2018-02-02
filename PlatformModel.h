@@ -25,6 +25,7 @@ class PlatformModel{
   public:
     PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, params p);
 
+    std::shared_ptr<ChBodyEasyCylinder> &getMonopile(){  return monopile; };
 };
 
 #endif
