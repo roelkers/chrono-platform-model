@@ -93,6 +93,7 @@ IF(ENABLE_MODULE_IRRLICHT)
           PlatformModel.cpp
           defineParameters.cpp
           MooringLine.cpp
+          BuoyancyForce.cpp
         )
 
         ADD_EXECUTABLE(${PROGRAM}  ${SOURCE_FILES})

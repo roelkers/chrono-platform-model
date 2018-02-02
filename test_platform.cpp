@@ -13,6 +13,7 @@
 #include "params.h"
 #include "defineParameters.h"
 #include "PlatformModel.h"
+#include "BuoyancyForce.h"
 
 using namespace chrono;
 using namespace chrono::fea;
@@ -140,14 +141,9 @@ int main(int argc, char* argv[]) {
         //forcedNode->SetForce(ChVector<>(500,0,0));
         monopile->RemoveAllForces();
         //auto forceVector = std::make_shared<ChVector> ChVector<>(500,0,0);
-        auto loadBodyForce = std::make_shared<ChLoadBodyForce> (
-          monopile, //body
-          ChVector<>(50000,-50000,50000), //force
-          false, //local_force
-          ChVector<>(0,0,0), //point
-          true //local point
-        );
-        mloadcontainer->Add(loadBodyForce);
+        //Apply BuoyancyForce
+        BuoyancyForce buoyancyForce(p, mloadcontainer, monopile);
+
         //ChIrrAppTools
         ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);
         application.DoStep();
