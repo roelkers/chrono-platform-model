@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
     params p = defineParameters();
 
     PlatformModel model(my_system, my_mesh, p);
+    //get reference to monopile
     std::shared_ptr<ChBodyEasyCylinder> monopile = model.getMonopile();
 
     // Remember to add the mesh to the system!
