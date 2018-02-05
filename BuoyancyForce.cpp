@@ -8,16 +8,53 @@
 #include "params.h"
 
 BuoyancyForce::BuoyancyForce(params p, std::shared_ptr<ChLoadContainer> loadContainer, std::shared_ptr<ChBodyEasyCylinder> monopile){
-  ChVector<> pos = monopile->GetPos();
+
+  p = p;
+  mmonopile = monopile;
+  mloadContainer = loadContainer;
+
+  ChVector<> pos = mmonopile->GetPos();
+
+  //Init Buoyancy force
+  update();
+
+  //Add load to container
+  mloadContainer->Add(mbuoyancyForce);
+}
+
+void BuoyancyForce::update(){
+
+  computeBuoyancyCenter();
+
+  double force = computeBuoyancyForce();
+
+  mbuoyancyForce = std::make_shared<ChLoadBodyForce> (
+    mmonopile, //body
+    ChVector<>(0,0,force), //force in positive z direction
+    false, //local_force
+    ChVector<>(0,0,0), //local Gravity Center, therefore just set to 0
+    true //local point
+  );
+
+}
+
+void BuoyancyForce::computeBuoyancyCenter(){
+
+  ChVector<> pos = mmonopile->GetPos();
   double gravityCenter = pos.z();
   GetLog() << "gravityCenter: " << gravityCenter << "\n";
 
-  double buoyancyCenter = -0.5*(p.towerHeight - gravityCenter);
-  GetLog() << "buoyancyCenter: " << buoyancyCenter << "\n";
+  mbuoyancyCenter = -0.5*(p.towerHeight - gravityCenter);
+  GetLog() << "buoyancyCenter: " << mbuoyancyCenter << "\n";
 
-  if(buoyancyCenter<0){
+}
 
-    double submergedVolumeMonopile = (M_PI*pow(p.towerRadius,2))*2*abs(buoyancyCenter);
+double BuoyancyForce::computeBuoyancyForce(){
+
+  //check if monopile is actually submerged
+  if(mbuoyancyCenter<0){
+
+    double submergedVolumeMonopile = (M_PI*pow(p.towerRadius,2))*2*abs(mbuoyancyCenter);
 
     double force = submergedVolumeMonopile*p.rhoWater*p.g;
 
@@ -25,13 +62,7 @@ BuoyancyForce::BuoyancyForce(params p, std::shared_ptr<ChLoadContainer> loadCont
 
     GetLog() << "submergedVolumeMonopile: " << submergedVolumeMonopile << "\n";
 
-      buoyancyForce = std::make_shared<ChLoadBodyForce> (
-        monopile, //body
-        ChVector<>(0,0,force), //force
-        false, //local_force
-        ChVector<>(0,0,0), //local Gravity Center, therefore just set to 0
-        true //local point
-      );
-      loadContainer->Add(buoyancyForce);
+    return force;
   }
+  return 0; //if monopile is not submerged set force to 0
 }

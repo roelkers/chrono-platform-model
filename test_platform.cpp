@@ -48,6 +48,13 @@ int main(int argc, char* argv[]) {
     //get reference to monopile
     std::shared_ptr<ChBodyEasyCylinder> monopile = model.getMonopile();
 
+    //Init Load container
+    auto mloadcontainer = std::make_shared<ChLoadContainer>();
+    my_system.Add(mloadcontainer);
+
+    //Add Buoyancy Force
+    BuoyancyForce buoyancyForce(p, mloadcontainer, monopile);
+
     // Remember to add the mesh to the system!
     my_system.Add(my_mesh);
 
@@ -96,10 +103,6 @@ int main(int argc, char* argv[]) {
     // that you added to the bodies into 3D shapes, they can be visualized by Irrlicht!
     application.AssetUpdateAll();
 
-    //Init Load container
-    auto mloadcontainer = std::make_shared<ChLoadContainer>();
-    my_system.Add(mloadcontainer);
-
     // Mark completion of system construction
     my_system.SetupInitial();
 
@@ -133,20 +136,18 @@ int main(int argc, char* argv[]) {
     //
     application.SetTimestep(0.01);
 
-    std::vector<std::shared_ptr<ChForce>> forceList;
+    std::vector<std::shared_ptr<ChLoadBase>> loadList;
 
     while (application.GetDevice()->run()) {
         application.BeginScene();
         application.DrawAll();
-        //Apply Force to Body
-        //forcedNode->SetX0(monopile->GetPos());
-        //forcedNode->SetForce(ChVector<>(500,0,0));
-        monopile->RemoveAllForces();
-        //auto forceVector = std::make_shared<ChVector> ChVector<>(500,0,0);
+
+        //monopile->RemoveAllForces();
         //Apply BuoyancyForce
-        BuoyancyForce buoyancyForce(p, mloadcontainer, monopile);
-        forceList = monopile->GetForceList();
+        buoyancyForce.update();
         
+        //loadList = mloadcontainer->GetLoadList();
+        //GetLog() << "Load:" << loadList.at(0) << "\n";
         //ChIrrAppTools
         ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);
         application.DoStep();
