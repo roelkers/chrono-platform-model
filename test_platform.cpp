@@ -133,6 +133,8 @@ int main(int argc, char* argv[]) {
     //
     application.SetTimestep(0.01);
 
+    std::vector<std::shared_ptr<ChForce>> forceList;
+
     while (application.GetDevice()->run()) {
         application.BeginScene();
         application.DrawAll();
@@ -143,7 +145,8 @@ int main(int argc, char* argv[]) {
         //auto forceVector = std::make_shared<ChVector> ChVector<>(500,0,0);
         //Apply BuoyancyForce
         BuoyancyForce buoyancyForce(p, mloadcontainer, monopile);
-
+        forceList = monopile->GetForceList();
+        
         //ChIrrAppTools
         ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);
         application.DoStep();

@@ -8,7 +8,7 @@ params defineParameters(){
   params p;
   p.towerHeight=100;
   p.towerRadius=5;
-  p.towerDensity=1000;
+  p.towerDensity=500;
   p.towerInitPos = ChVector<>(0, 0, 0);
   p.towerInitDir = ChVector<>(0, 0, 1);
 
@@ -24,6 +24,9 @@ params defineParameters(){
   double sectionLength = p.mooringL/p.mooringNrElements;
   GetLog() << "sectionLength: " << sectionLength << "\n";
   p.mooringRestLength = sectionLength*0.9;
+
+  p.rhoWater = 1000;
+  p.g = 9.81;
 
   return p;
 }

@@ -47,7 +47,7 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       */
 
       //Add Gravity
-      system.Set_G_acc(ChVector<>(0,0,-9.8));
+      system.Set_G_acc(ChVector<>(0,0,-p.g));
 
       //Angular increment of Mooring Line on Monopile
       double thetaInc = 360/p.mooringLineNr;
@@ -59,7 +59,7 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
 
         GetLog() << "Mooring Line Angular position: " << theta << "deg\n";
         GetLog() << "Constructing mooring line " << i << "\n";
-        MooringLine mLine(system, mesh, p, theta, monopile);
-        mooringLines[i] = mLine;
+        //MooringLine mLine(system, mesh, p, theta, monopile);
+        //mooringLines[i] = mLine;
       }
 }
