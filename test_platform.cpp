@@ -145,9 +145,10 @@ int main(int argc, char* argv[]) {
         //monopile->RemoveAllForces();
         //Apply BuoyancyForce
         buoyancyForce.update();
-        
+
         //loadList = mloadcontainer->GetLoadList();
         //GetLog() << "Load:" << loadList.at(0) << "\n";
+
         //ChIrrAppTools
         ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);
         application.DoStep();

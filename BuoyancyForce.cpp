@@ -28,6 +28,7 @@ void BuoyancyForce::update(){
 
   double force = computeBuoyancyForce();
 
+  //update buoyancy force
   mbuoyancyForce = std::make_shared<ChLoadBodyForce> (
     mmonopile, //body
     ChVector<>(0,0,force), //force in positive z direction
@@ -44,7 +45,9 @@ void BuoyancyForce::computeBuoyancyCenter(){
   double gravityCenter = pos.z();
   GetLog() << "gravityCenter: " << gravityCenter << "\n";
 
-  mbuoyancyCenter = -0.5*(p.towerHeight - gravityCenter);
+  double lwi = -(0.5*p.towerHeight - gravityCenter);
+
+  mbuoyancyCenter = -0.5*(p.towerHeight - lwi );
   GetLog() << "buoyancyCenter: " << mbuoyancyCenter << "\n";
 
 }
