@@ -9,6 +9,7 @@
 class BuoyancyForce {
 private:
   params p;
+  double gravityCenter;
   std::shared_ptr<ChBodyEasyCylinder> mmonopile;
   std::shared_ptr<ChLoadBodyForce> mbuoyancyForce;
   std::shared_ptr<ChLoadContainer> mloadContainer;

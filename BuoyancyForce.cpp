@@ -27,6 +27,7 @@ void BuoyancyForce::update(){
   computeBuoyancyCenter();
 
   double force = computeBuoyancyForce();
+  GetLog() << "Buoyancy Force: " << force << "\n";
 
   //update buoyancy force
   mbuoyancyForce = std::make_shared<ChLoadBodyForce> (
@@ -42,13 +43,15 @@ void BuoyancyForce::update(){
 void BuoyancyForce::computeBuoyancyCenter(){
 
   ChVector<> pos = mmonopile->GetPos();
-  double gravityCenter = pos.z();
+  gravityCenter = pos.z();
   GetLog() << "gravityCenter: " << gravityCenter << "\n";
 
-  double lwi = -(0.5*p.towerHeight - gravityCenter);
+  double z_iw = 0.5*p.towerHeight + gravityCenter;
 
-  mbuoyancyCenter = -0.5*(p.towerHeight - lwi );
+  mbuoyancyCenter = -0.5*(p.towerHeight - z_iw);
   GetLog() << "buoyancyCenter: " << mbuoyancyCenter << "\n";
+  GetLog() << "Monopile Mass: " << mmonopile->GetMass() << "\n";
+  GetLog() << "Gravity Force: " << mmonopile->GetMass()*p.towerDensity*p.g << "\n";
 
 }
 
@@ -56,12 +59,18 @@ double BuoyancyForce::computeBuoyancyForce(){
 
   //check if monopile is actually submerged
   if(mbuoyancyCenter<0){
+    double submergedVolumeMonopile;
 
-    double submergedVolumeMonopile = (M_PI*pow(p.towerRadius,2))*2*abs(mbuoyancyCenter);
+    if(gravityCenter<0.5*p.towerHeight){
+      //tower completely submerged return volume of complete water cube
+      submergedVolumeMonopile =  M_PI*pow(p.towerRadius,2)*p.towerHeight;
+    }
+    else{
+      //tower partly submerged, return volume
+      submergedVolumeMonopile = abs((M_PI*pow(p.towerRadius,2))*2*mbuoyancyCenter);
+    }
 
     double force = submergedVolumeMonopile*p.rhoWater*p.g;
-
-    GetLog() << "Buoyancy Force: " << force << "\n";
 
     GetLog() << "submergedVolumeMonopile: " << submergedVolumeMonopile << "\n";
 
