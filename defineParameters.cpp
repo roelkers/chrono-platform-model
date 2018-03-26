@@ -8,7 +8,7 @@ params defineParameters(){
   params p;
   p.towerHeight=100;
   p.towerRadius=5;
-  p.towerDensity=600;
+  p.towerDensity=500;
   p.towerInitPos = ChVector<>(0, 0, 0);
   p.towerInitDir = ChVector<>(0, 0, 1);
 

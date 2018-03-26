@@ -27,7 +27,7 @@ void BuoyancyForce::update(){
   computeBuoyancyCenter();
 
   double force = computeBuoyancyForce();
-  GetLog() << "Buoyancy Force: " << force << "\n";
+  GetLog() << "Buoyancy Force: " << force << "\n\n";
 
   //update buoyancy force
   mbuoyancyForce = std::make_shared<ChLoadBodyForce> (
@@ -60,8 +60,9 @@ double BuoyancyForce::computeBuoyancyForce(){
   //check if monopile is actually submerged
   if(mbuoyancyCenter<0){
     double submergedVolumeMonopile;
+    GetLog() << "0.5*towerHeight: " << 0.5*p.towerHeight << "\n";
 
-    if(gravityCenter<0.5*p.towerHeight){
+    if(gravityCenter<-0.5*p.towerHeight){
       //tower completely submerged return volume of complete water cube
       submergedVolumeMonopile =  M_PI*pow(p.towerRadius,2)*p.towerHeight;
     }

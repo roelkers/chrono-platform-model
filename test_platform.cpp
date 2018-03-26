@@ -137,17 +137,23 @@ int main(int argc, char* argv[]) {
     application.SetTimestep(0.01);
 
     std::vector<std::shared_ptr<ChLoadBase>> loadList;
+    std::vector< std::shared_ptr< ChForce>> forceList;
 
     while (application.GetDevice()->run()) {
         application.BeginScene();
         application.DrawAll();
 
-        //monopile->RemoveAllForces();
+        monopile->RemoveAllForces();
         //Apply BuoyancyForce
         buoyancyForce.update();
-
-        //loadList = mloadcontainer->GetLoadList();
-        //GetLog() << "Load:" << loadList.at(0) << "\n";
+        
+        /*forceList = monopile->GetForceList();
+        for(auto const& force : forceList){
+          GetLog() << "forces for this timestep" << "\n";
+          GetLog() << force->GetF_z() << "\n";
+        }*/
+        loadList = mloadcontainer->GetLoadList();
+        GetLog() << "Load:" << loadList.at(0) << "\n";
 
         //ChIrrAppTools
         ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);

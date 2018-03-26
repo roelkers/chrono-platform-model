@@ -56,10 +56,11 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       //Construct Mooring Lines
       for(int i = 0; i < p.mooringLineNr; i++){
         theta = theta + thetaInc;
-
+        /*
         GetLog() << "Mooring Line Angular position: " << theta << "deg\n";
         GetLog() << "Constructing mooring line " << i << "\n";
-        //MooringLine mLine(system, mesh, p, theta, monopile);
-        //mooringLines[i] = mLine;
+        MooringLine mLine(system, mesh, p, theta, monopile);
+        mooringLines[i] = mLine;
+        */
       }
 }
