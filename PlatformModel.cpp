@@ -48,6 +48,7 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
 
       //Add Gravity
       system.Set_G_acc(ChVector<>(0,0,-p.g));
+      //system.Set_G_acc(ChVector<>(0,0,0));
 
       //Angular increment of Mooring Line on Monopile
       double thetaInc = 360/p.mooringLineNr;

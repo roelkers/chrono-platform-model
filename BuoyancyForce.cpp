@@ -15,10 +15,21 @@ BuoyancyForce::BuoyancyForce(params p, std::shared_ptr<ChLoadContainer> loadCont
 
   ChVector<> pos = mmonopile->GetPos();
 
+  computeBuoyancyCenter();
+
+  double force = computeBuoyancyForce();
+
   //Init Buoyancy force
-  update();
+  mbuoyancyForce = std::make_shared<ChLoadBodyForce> (
+    mmonopile, //body
+    ChVector<>(0,0,force), //force in positive z direction
+    false, //local_force
+    ChVector<>(0,0,0), //local Gravity Center, therefore just set to 0
+    true //local point
+  );
 
   //Add load to container
+
   mloadContainer->Add(mbuoyancyForce);
 }
 
@@ -29,14 +40,10 @@ void BuoyancyForce::update(){
   double force = computeBuoyancyForce();
   GetLog() << "Buoyancy Force: " << force << "\n\n";
 
+  mloadContainer->VariablesFbReset();
+
   //update buoyancy force
-  mbuoyancyForce = std::make_shared<ChLoadBodyForce> (
-    mmonopile, //body
-    ChVector<>(0,0,force), //force in positive z direction
-    false, //local_force
-    ChVector<>(0,0,0), //local Gravity Center, therefore just set to 0
-    true //local point
-  );
+  mbuoyancyForce->SetForce(ChVector<>(0,0,force),false);
 
 }
 

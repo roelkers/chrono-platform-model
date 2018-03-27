@@ -138,6 +138,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::shared_ptr<ChLoadBase>> loadList;
     std::vector< std::shared_ptr< ChForce>> forceList;
+    std::shared_ptr<ChVectorDynamic<>> chVectorDyn;
 
     while (application.GetDevice()->run()) {
         application.BeginScene();
@@ -146,14 +147,18 @@ int main(int argc, char* argv[]) {
         monopile->RemoveAllForces();
         //Apply BuoyancyForce
         buoyancyForce.update();
-        
+
         /*forceList = monopile->GetForceList();
         for(auto const& force : forceList){
           GetLog() << "forces for this timestep" << "\n";
           GetLog() << force->GetF_z() << "\n";
         }*/
         loadList = mloadcontainer->GetLoadList();
-        GetLog() << "Load:" << loadList.at(0) << "\n";
+        //GetLog() << "Load:" << loadList.at(0)->LoadGet_ndof_x() << "\n";
+        //ChVectorDynamic<> chVectorDyn(1);
+        //mloadcontainer->IntLoadResidual_F(0, chVectorDyn, 1);
+        //GetLog() << "Length:"<< chVectorDyn.GetLength() << "\n";
+        //GetLog() << "LoadResidual:" << chVectorDyn.NormWRMS(chVectorDyn) << "\n";
 
         //ChIrrAppTools
         ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);
