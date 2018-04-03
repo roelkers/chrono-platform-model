@@ -13,7 +13,7 @@
 #include "params.h"
 #include "defineParameters.h"
 #include "PlatformModel.h"
-#include "BuoyancyForce.h"
+#include "Buoyancy.h"
 
 using namespace chrono;
 using namespace chrono::fea;
@@ -46,14 +46,7 @@ int main(int argc, char* argv[]) {
 
     PlatformModel model(my_system, my_mesh, p);
     //get reference to monopile
-    std::shared_ptr<ChBodyEasyCylinder> monopile = model.getMonopile();
-
-    //Init Load container
-    auto mloadcontainer = std::make_shared<ChLoadContainer>();
-    my_system.Add(mloadcontainer);
-
-    //Add Buoyancy Force
-    BuoyancyForce buoyancyForce(p, mloadcontainer, monopile);
+    //std::shared_ptr<Buoyancy> buoyancy = model.getBuoyancy();
 
     // Remember to add the mesh to the system!
     my_system.Add(my_mesh);
@@ -80,6 +73,13 @@ int main(int argc, char* argv[]) {
     mvisualizebeamC->SetSymbolsScale(0.01);
     mvisualizebeamC->SetZbufferHide(false);
     my_mesh->AddAsset(mvisualizebeamC);
+
+
+    auto mvisualizemeshC = std::make_shared<ChVisualizationFEAmesh>(*(my_mesh.get()));
+    mvisualizemeshC->SetFEMglyphType(ChVisualizationFEAmesh::E_GLYPH_NODE_DOT_POS);
+    mvisualizemeshC->SetFEMdataType(ChVisualizationFEAmesh::E_PLOT_NONE);
+    mvisualizemeshC->SetSymbolsThickness(0.006);
+    my_mesh->AddAsset(mvisualizemeshC);
 
     //Set "UP"-direction of ChCamera
 
@@ -136,29 +136,14 @@ int main(int argc, char* argv[]) {
     //
     application.SetTimestep(0.01);
 
-    std::vector<std::shared_ptr<ChLoadBase>> loadList;
-    std::vector< std::shared_ptr< ChForce>> forceList;
-    std::shared_ptr<ChVectorDynamic<>> chVectorDyn;
-
     while (application.GetDevice()->run()) {
         application.BeginScene();
         application.DrawAll();
 
-        monopile->RemoveAllForces();
-        //Apply BuoyancyForce
-        buoyancyForce.update();
-
-        /*forceList = monopile->GetForceList();
-        for(auto const& force : forceList){
-          GetLog() << "forces for this timestep" << "\n";
-          GetLog() << force->GetF_z() << "\n";
-        }*/
-        loadList = mloadcontainer->GetLoadList();
-        //GetLog() << "Load:" << loadList.at(0)->LoadGet_ndof_x() << "\n";
-        //ChVectorDynamic<> chVectorDyn(1);
-        //mloadcontainer->IntLoadResidual_F(0, chVectorDyn, 1);
-        //GetLog() << "Length:"<< chVectorDyn.GetLength() << "\n";
-        //GetLog() << "LoadResidual:" << chVectorDyn.NormWRMS(chVectorDyn) << "\n";
+        //Update BuoyancyForce
+        //GetLog() << buoyancy->getMonopile() << "\n";
+        //GetLog() << "before update\nu
+        model.update();
 
         //ChIrrAppTools
         ChIrrTools::drawAllCOGs(my_system,application.GetVideoDriver(),100);

@@ -10,6 +10,7 @@
 
 #include "MooringLine.h"
 #include "params.h"
+#include "Buoyancy.h"
 
 using namespace chrono;
 using namespace chrono::fea;
@@ -19,13 +20,13 @@ class PlatformModel{
   private:
     std::shared_ptr<ChNodeFEAxyzD> monopileInitNode;
     std::shared_ptr<ChBodyEasyCylinder> monopile;
-
+    std::shared_ptr<Buoyancy> buoyancy;
     std::vector<MooringLine> mooringLines;
 
   public:
     PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, params p);
+    void update();
 
-    std::shared_ptr<ChBodyEasyCylinder> &getMonopile(){  return monopile; };
 };
 
 #endif

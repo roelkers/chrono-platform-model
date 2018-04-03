@@ -22,6 +22,7 @@ struct params{
   double mooringPosBottomZ;
   double mooringRestLength;
 
+  double seaLevel;
   double rhoWater;
   double g;
 };

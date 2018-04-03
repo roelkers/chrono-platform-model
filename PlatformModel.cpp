@@ -10,6 +10,7 @@
 
 #include "PlatformModel.h"
 #include "params.h"
+#include "Buoyancy.h"
 
 using namespace chrono;
 using namespace chrono::fea;
@@ -33,6 +34,14 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
 
       GetLog() << "monopile initial position:" << monopile->GetPos() << "\n";
       GetLog() << "Rest Length: " << p.mooringRestLength << "\n";
+
+      //Add Buoyancy force
+
+      //Init Load container
+      auto loadcontainer = std::make_shared<ChLoadContainer>();
+      system.Add(loadcontainer);
+
+      buoyancy = std::make_shared<Buoyancy>(p, loadcontainer, monopile, mesh, system);
 
       //Fix Monopile in space
       /*auto constraint_pos = std::make_shared<ChLinkPointFrame>();
@@ -64,4 +73,8 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
         mooringLines[i] = mLine;
         */
       }
+}
+
+void PlatformModel::update(){
+  buoyancy->update();
 }

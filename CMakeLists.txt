@@ -93,7 +93,7 @@ IF(ENABLE_MODULE_IRRLICHT)
           PlatformModel.cpp
           defineParameters.cpp
           MooringLine.cpp
-          BuoyancyForce.cpp
+          Buoyancy.cpp
         )
 
         ADD_EXECUTABLE(${PROGRAM}  ${SOURCE_FILES})
@@ -101,7 +101,7 @@ IF(ENABLE_MODULE_IRRLICHT)
         SOURCE_GROUP(""  FILES  "${PROGRAM}.cpp")
         SET_TARGET_PROPERTIES(${PROGRAM} PROPERTIES
             FOLDER demos
-            COMPILE_FLAGS "${CH_CXX_FLAGS} ${CH_IRRLICHT_CXX_FLAGS}"
+            COMPILE_FLAGS "-g ${CH_CXX_FLAGS} ${CH_IRRLICHT_CXX_FLAGS}"
             LINK_FLAGS "${CH_LINKERFLAG_EXE}")
         TARGET_LINK_LIBRARIES(${PROGRAM}
             ${CH_IRRLICHTLIB}
