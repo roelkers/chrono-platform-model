@@ -23,15 +23,17 @@ private:
   std::shared_ptr<ChMarker> markerBottom;
   std::shared_ptr<ChMarker> markerTop;
   ChVector<> buoyancyCenter; //z-coordinate of buyoancy center of monopile from xy-plane
-  //std::shared_ptr<ChNodeFEAxyz> buoyancyCenterVizNode;
+  //visualization & testing
   std::shared_ptr<ChBodyEasySphere> buoyancyCenterVizSphere;
   std::shared_ptr<ChBodyEasySphere> ipCenterVizSphere;
+  std::shared_ptr<ChBodyEasySphere> bottomMarkerVizSphere;
+  std::shared_ptr<ChBodyEasySphere> topMarkerVizSphere;
 public:
   Buoyancy(params p, std::shared_ptr<ChLoadContainer> loadContainer, std::shared_ptr<ChBodyEasyCylinder> monopile, std::shared_ptr<ChMesh> mesh, ChSystem& system);
   void update();
-  void computeBuoyancyForce(ChVector<> vecE, ChVector<> vecI, ChVector<> intersectionPoint);
-  void computeBuoyancyCenter(ChVector<> vecE, ChVector<> vecI, ChVector<> intersectionPoint);
-
+  void computeBuoyancy(ChVector<> vecE, ChVector<> vecI, ChVector<> intersectionPoint);
+  double computeMaximumBuoyancyForce();
+  double computeBuoyancyForce(double submergedLength);
 };
 
 #endif

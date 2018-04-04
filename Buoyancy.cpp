@@ -27,11 +27,15 @@ loadContainer(loadContainer)
   ChVector<> towerPos = monopile->GetPos();
   ChFrameMoving<> frame = monopile->GetFrame_COG_to_abs();
   //Get rotation of frame as a quaternion
-  ChQuaternion<> quaternion = frame.GetRot();
+  ChQuaternion<> qmonopile = frame.GetRot();
   //Get unity vector in z direction
   ChVector<> zUnityVector = ChVector<>(0,0,1);
+  //Rotate Coordinate system back
+  ChQuaternion<> qcorrection = Q_from_AngAxis(-90 * CH_C_DEG_TO_RAD, VECT_X);
+
+  ChQuaternion<> qcombined = qmonopile* qcorrection;
   //Get vector in direction of tower axis by rotating vector around quaternion
-  ChVector<> towerAxis = quaternion.Rotate(zUnityVector);
+  ChVector<> towerAxis = qcombined.Rotate(zUnityVector);
 
   markerBottom = std::make_shared<ChMarker>();
   //Set Marker Position relative to local coordinate system
@@ -85,11 +89,30 @@ loadContainer(loadContainer)
   ipCenterVizSphere->SetPos(ChVector<>(0, 0, 0));
   ipCenterVizSphere->SetBodyFixed(true);
   system.Add(ipCenterVizSphere);
-  ipCenterVizSphere->SetPos(ChVector<>(0,-20,-100));
   // optional, attach a texture for better visualization
   auto mtextureball2 = std::make_shared<ChTexture>();
   mtextureball2->SetTextureFilename(GetChronoDataFile("blu.png"));
   ipCenterVizSphere->AddAsset(mtextureball2);
+
+  topMarkerVizSphere = std::make_shared<ChBodyEasySphere>(5,      // radius
+                                                       8000,   // density
+                                                       false,   // collide enable?
+                                                       true);  // visualization?
+  topMarkerVizSphere->SetPos(ChVector<>(0, 0, 0));
+  topMarkerVizSphere->SetBodyFixed(true);
+  system.Add(topMarkerVizSphere);
+  // optional, attach a texture for better visualization
+  topMarkerVizSphere->AddAsset(mtextureball2);
+
+  bottomMarkerVizSphere = std::make_shared<ChBodyEasySphere>(5,      // radius
+                                                       8000,   // density
+                                                       false,   // collide enable?
+                                                       true);  // visualization?
+  bottomMarkerVizSphere->SetPos(ChVector<>(0, 0, 0));
+  bottomMarkerVizSphere->SetBodyFixed(true);
+  system.Add(bottomMarkerVizSphere);
+  // optional, attach a texture for better visualization
+  bottomMarkerVizSphere->AddAsset(mtextureball2);
 
   //Update Buoyancy Force
   update();
@@ -102,6 +125,9 @@ void Buoyancy::update(){
 
   markerBottom->UpdateState();
   markerTop->UpdateState();
+
+  bottomMarkerVizSphere->SetPos(markerBottom->GetAbsCoord().pos);
+  topMarkerVizSphere->SetPos(markerTop->GetAbsCoord().pos);
 
   ChVector<> seaLevelVector = ChVector<>(0,0,p.seaLevel);
   ChVector<> towerPos = monopile->GetPos();
@@ -152,24 +178,18 @@ void Buoyancy::update(){
   GetLog() << "vecI:" << vecI << "\n";
   GetLog() << "intersectionPoint:" << intersectionPoint << "\n";
 
-  computeBuoyancyCenter(vecE,vecI,  intersectionPoint);
+  ipCenterVizSphere->SetPos(intersectionPoint);
 
-  computeBuoyancyForce(vecE, vecI, intersectionPoint);
+  computeBuoyancy(vecE, vecI, intersectionPoint);
 
-  GetLog() << "gravityCenter: X: " << towerPos.x() << "\n";
-  GetLog() << "gravityCenter: Y: " << towerPos.y() << "\n";
-  GetLog() << "gravityCenter: Z: " << towerPos.z() << "\n";
-
-  //GetLog() << "Monopile Mass: " << monopile->GetMass() << "\n";
-  //GetLog() << "Gravity Force: " << monopile->GetMass()*p.towerDensity*p.g << "\n";
-
+  GetLog() << "gravityCenter:" << towerPos << "\n";
 }
 
-void Buoyancy::computeBuoyancyCenter(ChVector<> vecE, ChVector<> vecI, ChVector<> intersectionPoint){
+void Buoyancy::computeBuoyancy(ChVector<> vecE, ChVector<> vecI, ChVector<> intersectionPoint){
   // Skizze:
   // G: Center of gravity
-  // S: intersection point
-  // B: buoayancy Center
+  // S: intersection point at water surface
+  // B: buoyancy Center
   // E: bottom
   // I: top
   // -----------I------------
@@ -187,62 +207,68 @@ void Buoyancy::computeBuoyancyCenter(ChVector<> vecE, ChVector<> vecI, ChVector<
 
   ChVector<> towerPos = monopile->GetPos();
 
-  //ChVector<> vecEI = vecI - vecE;
-
-  //GetLog() << "Length EI:" << vecEI.Length() << "\n";
-
-  //ChVector<> vecSG = towerPos - intersectionPoint;
-
-  //ChVector<> vecGI = vecI - towerPos;
-
-  //ChVector<> vecSI = vecSG + vecGI;
-
   ChVector<> vecES = intersectionPoint- vecE;
-
+  ChVector<> vecIS = intersectionPoint- vecE;
   ChVector<> vecSE = vecE - intersectionPoint;
+  ChVector<> vecSI = vecI - intersectionPoint;
 
-  GetLog() << "vecES" << vecES << "\n";
+  ChVector<> vecGE = vecE - towerPos;
+  ChVector<> vecGS = intersectionPoint - towerPos;
+  ChVector<> vecGI = vecI - towerPos;
 
-  buoyancyCenter = intersectionPoint + 0.5*vecSE;
-
-  GetLog() << "buoyancy center" << buoyancyCenter << "\n";
-  buoyancyCenterVizSphere->SetPos(buoyancyCenter);
-
-  ipCenterVizSphere->SetPos(intersectionPoint);
-
-  buoyancyForce->SetApplicationPoint(buoyancyCenter,false);
-}
-
-void Buoyancy::computeBuoyancyForce(ChVector<> vecE, ChVector<> vecI, ChVector<> intersectionPoint){
+  GetLog() << "vecSE:" << vecSE << "\n";
 
   double force = 0;
-  double submergedVolumeMonopile = 0;
-  //check if monopile is actually submerged
-  if(buoyancyCenter.z()<p.seaLevel){
-    ChVector<> towerPos = monopile->GetPos();
-
-    ChVector<> vecEG = towerPos - vecE;
-    ChVector<> vecGS = intersectionPoint - towerPos;
-    ChVector<> vecGI = vecI - towerPos;
-
-    //check if distance to sea level is larger than distance to top of tower
-    if(vecGS.Length() >= vecGI.Length()){
-      //tower completely submerged, return volume of complete water cube
-      submergedVolumeMonopile =  M_PI*pow(p.towerRadius,2)*p.towerHeight;
+  //check if distance to sea level is larger than distance to top of tower
+  if(vecGS.Length() >= vecGI.Length() && vecGS.Length() >= vecGE.Length()){
+    //sanity check if I and E are both below Sea level
+    if(vecE.z() < p.seaLevel && vecI.z() < p.seaLevel){
+    //tower completely submerged, buoyancy center is same as gravity center
+    buoyancyCenter = towerPos;
+    force = computeMaximumBuoyancyForce();
     }
     else{
-      //tower partly submerged
-      //submerged length is half the tower + vector of G to S (sea level)
-      ChVector<> submergedVec = vecEG + vecGS;
-      submergedVolumeMonopile = abs((M_PI*pow(p.towerRadius,2))*2*submergedVec.Length());
+    // in this case the tower is "flying", and we should not apply any buoyancy force
+    GetLog() << "flying tower\n";
+    force = 0;
     }
-
-    force = submergedVolumeMonopile*p.rhoWater*p.g;
-
   }
-  GetLog() << "submergedVolumeMonopile: " << submergedVolumeMonopile << "\n";
+  else{
+    //Check which end of the tower is submerged, and which is above the sea
+    if(vecE.z() > p.seaLevel){
+      GetLog() << "partly submerged, E above sea level\n";
+      //construct buoyancy volume from S to I
+      buoyancyCenter = intersectionPoint + 0.5*vecSI;
+      ChVector<> submergedVector = vecSI*2;
+      force = computeBuoyancyForce(submergedVector.Length());
+    }
+    else if(vecI.z() > p.seaLevel){
+      GetLog() << "partly submerged, I above sea level\n";
+      //construct buoyancy volume from S to E
+      buoyancyCenter = intersectionPoint + 0.5*vecSE;
+      ChVector<> submergedVector = vecSE*2;
+      force = computeBuoyancyForce(submergedVector.Length());
+    }
+    else GetLog() << "both E and I below sea level.This MUST not happen.\n";
+  }
+
+  GetLog() << "buoyancy center" << buoyancyCenter << "\n";
   GetLog() << "buoyancyForce:" << force << "\n";
 
-  //update buoyancy force
+  buoyancyCenterVizSphere->SetPos(buoyancyCenter);
+
+  buoyancyForce->SetApplicationPoint(buoyancyCenter,false);
+
   buoyancyForce->SetForce(ChVector<>(0,0,force),false);
+}
+
+double Buoyancy::computeMaximumBuoyancyForce(){
+        //tower completely submerged, return volume of complete water cylinder
+    double submergedVolumeMonopile =  M_PI*pow(p.towerRadius,2)*p.towerHeight;
+    return submergedVolumeMonopile*p.rhoWater*p.g;
+}
+
+double Buoyancy::computeBuoyancyForce(double submergedLength){
+    double submergedVolumeMonopile = M_PI*pow(p.towerRadius,2)*submergedLength;
+    return submergedVolumeMonopile*p.rhoWater*p.g;
 }
