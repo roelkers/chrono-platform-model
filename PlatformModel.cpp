@@ -25,7 +25,7 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       monopile->SetPos(monopileInitNode->GetPos());
 
       //Rotate around x axis to align tower with z axis
-      ChQuaternion<> q = Q_from_AngAxis(90 * CH_C_DEG_TO_RAD, VECT_X);
+      ChQuaternion<> q = Q_from_AngAxis(70 * CH_C_DEG_TO_RAD, VECT_X);
       monopile->SetRot(q);
 
       system.Add(monopile);

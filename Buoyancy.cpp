@@ -7,7 +7,7 @@
 #include <chrono/core/ChCoordsys.h>
 #include "chrono_fea/ChMesh.h"
 #include "chrono/physics/ChSystem.h"
-#include <chrono_fea/ChNodeFEAxyz.h>
+#include <chrono/assets/ChTexture.h>
 
 
 #include "Buoyancy.h"
@@ -48,13 +48,6 @@ loadContainer(loadContainer)
   //Set marker parameters
   markerTop->SetBody(monopile.get());
   markerTop->Impose_Abs_Coord(topCoordsys);
-
-  buoyancyCenterVizNode = std::make_shared<ChNodeFEAxyz>(ChVector<>(0,0,0));
-
-  mesh->AddNode(buoyancyCenterVizNode);
-
-  //markerTop->SetPos(ChVector<>(0,0,0.5*p.towerHeight));
-
   ChVector<> vecE = markerBottom->GetAbsCoord().pos;
   ChVector<> vecI = markerTop->GetAbsCoord().pos;
 
@@ -67,12 +60,42 @@ loadContainer(loadContainer)
     true //local point
   );
 
+  //
+  //
+  //buoyancy visualized
+  //buoyancyCenterVizNode = std::make_shared<ChNodeFEAxyz>(ChVector<>(0,0,0));
+  //mesh->AddNode(buoyancyCenterVizNode);
+  // Create a sphere that will indicate buoyancy center position
+  buoyancyCenterVizSphere = std::make_shared<ChBodyEasySphere>(5,      // radius
+                                                       8000,   // density
+                                                       false,   // collide enable?
+                                                       true);  // visualization?
+  buoyancyCenterVizSphere->SetPos(ChVector<>(0, 0, 0));
+  buoyancyCenterVizSphere->SetBodyFixed(true);
+  system.Add(buoyancyCenterVizSphere);
+  // optional, attach a texture for better visualization
+  auto mtextureball1 = std::make_shared<ChTexture>();
+  mtextureball1->SetTextureFilename(GetChronoDataFile("bluwhite.png"));
+  buoyancyCenterVizSphere->AddAsset(mtextureball1);
+
+  ipCenterVizSphere = std::make_shared<ChBodyEasySphere>(5,      // radius
+                                                       8000,   // density
+                                                       false,   // collide enable?
+                                                       true);  // visualization?
+  ipCenterVizSphere->SetPos(ChVector<>(0, 0, 0));
+  ipCenterVizSphere->SetBodyFixed(true);
+  system.Add(ipCenterVizSphere);
+  ipCenterVizSphere->SetPos(ChVector<>(0,-20,-100));
+  // optional, attach a texture for better visualization
+  auto mtextureball2 = std::make_shared<ChTexture>();
+  mtextureball2->SetTextureFilename(GetChronoDataFile("blu.png"));
+  ipCenterVizSphere->AddAsset(mtextureball2);
+
   //Update Buoyancy Force
   update();
 
   //Add load to container
   loadContainer->Add(buoyancyForce);
-
 }
 
 void Buoyancy::update(){
@@ -84,11 +107,16 @@ void Buoyancy::update(){
   ChVector<> towerPos = monopile->GetPos();
   ChFrameMoving<> frame = monopile->GetFrame_COG_to_abs();
   //Get rotation of frame as a quaternion
-  ChQuaternion<> quaternion = frame.GetRot();
+  ChQuaternion<> qmonopile = frame.GetRot();
+  //Rotate Coordinate system back
+  ChQuaternion<> qcorrection = Q_from_AngAxis(-90 * CH_C_DEG_TO_RAD, VECT_X);
+
+  ChQuaternion<> qcombined = qmonopile* qcorrection;
+  GetLog() << "qcombined:" << qcombined << "\n";
   //Get unity vector in z direction
   ChVector<> zUnityVector = ChVector<>(0,0,1);
   //Get vector in direction of tower axis by rotating vector around quaternion
-  ChVector<> towerAxis = quaternion.Rotate(zUnityVector);
+  ChVector<> towerAxis = qcombined.Rotate(zUnityVector);
 
   GetLog() << "towerAxis: " << towerAxis << "\n";
 
@@ -132,10 +160,6 @@ void Buoyancy::update(){
   GetLog() << "gravityCenter: Y: " << towerPos.y() << "\n";
   GetLog() << "gravityCenter: Z: " << towerPos.z() << "\n";
 
-  GetLog() << "buoyancyCenter: X: " << buoyancyCenter.x() << "\n";
-  GetLog() << "buoyancyCenter: Y: " << buoyancyCenter.y() << "\n";
-  GetLog() << "buoyancyCenter: Z: " << buoyancyCenter.z() << "\n";
-
   //GetLog() << "Monopile Mass: " << monopile->GetMass() << "\n";
   //GetLog() << "Gravity Force: " << monopile->GetMass()*p.towerDensity*p.g << "\n";
 
@@ -163,21 +187,28 @@ void Buoyancy::computeBuoyancyCenter(ChVector<> vecE, ChVector<> vecI, ChVector<
 
   ChVector<> towerPos = monopile->GetPos();
 
-  ChVector<> vecEI = vecI - vecE;
+  //ChVector<> vecEI = vecI - vecE;
 
-  GetLog() << "Length EI:" << vecEI.Length() << "\n";
+  //GetLog() << "Length EI:" << vecEI.Length() << "\n";
 
-  ChVector<> vecSG = towerPos - intersectionPoint;
+  //ChVector<> vecSG = towerPos - intersectionPoint;
 
-  ChVector<> vecGI = vecI - towerPos;
+  //ChVector<> vecGI = vecI - towerPos;
 
-  ChVector<> vecSI = vecSG + vecGI;
+  //ChVector<> vecSI = vecSG + vecGI;
 
-  ChVector<> vecES = vecEI - vecSI;
+  ChVector<> vecES = intersectionPoint- vecE;
 
-  buoyancyCenter = intersectionPoint - 0.5*vecES;
+  ChVector<> vecSE = vecE - intersectionPoint;
 
-  buoyancyCenterVizNode->SetPos(buoyancyCenter);
+  GetLog() << "vecES" << vecES << "\n";
+
+  buoyancyCenter = intersectionPoint + 0.5*vecSE;
+
+  GetLog() << "buoyancy center" << buoyancyCenter << "\n";
+  buoyancyCenterVizSphere->SetPos(buoyancyCenter);
+
+  ipCenterVizSphere->SetPos(intersectionPoint);
 
   buoyancyForce->SetApplicationPoint(buoyancyCenter,false);
 }

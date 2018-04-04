@@ -10,6 +10,13 @@
 #include <chrono/physics/ChLoadsBody.h>
 #include <chrono/physics/ChLoadContainer.h>
 
+#include "chrono_fea/ChElementSpring.h"
+#include "chrono_fea/ChElementBar.h"
+#include "chrono_fea/ChElementTetra_4.h"
+#include "chrono_fea/ChElementTetra_10.h"
+#include "chrono_fea/ChElementHexa_8.h"
+#include "chrono_fea/ChElementHexa_20.h"
+
 #include "params.h"
 #include "defineParameters.h"
 #include "PlatformModel.h"
@@ -59,12 +66,14 @@ int main(int argc, char* argv[]) {
     // postprocessor that can handle a colored ChTriangleMeshShape).
     // Do not forget AddAsset() at the end!
 
+    /*
     auto mvisualizebeamA = std::make_shared<ChVisualizationFEAmesh>(*(my_mesh.get()));
     mvisualizebeamA->SetFEMdataType(ChVisualizationFEAmesh::E_PLOT_SURFACE);
     mvisualizebeamA->SetColorscaleMinMax(-0.4, 0.4);
     mvisualizebeamA->SetSmoothFaces(true);
     mvisualizebeamA->SetWireframe(false);
     my_mesh->AddAsset(mvisualizebeamA);
+
 
     auto mvisualizebeamC = std::make_shared<ChVisualizationFEAmesh>(*(my_mesh.get()));
     mvisualizebeamC->SetFEMglyphType(ChVisualizationFEAmesh::E_GLYPH_NODE_DOT_POS); // E_GLYPH_NODE_CSYS
@@ -73,12 +82,79 @@ int main(int argc, char* argv[]) {
     mvisualizebeamC->SetSymbolsScale(0.01);
     mvisualizebeamC->SetZbufferHide(false);
     my_mesh->AddAsset(mvisualizebeamC);
+    */
+    /*
+    auto mmaterial = std::make_shared<ChContinuumElastic>();
+    mmaterial->Set_E(0.01e9);  // rubber 0.01e9, steel 200e9
+    mmaterial->Set_v(0.3);
+    //mmaterial->Set_RayleighDampingK(0.001);
+    mmaterial->Set_RayleighDampingK(0);
+    mmaterial->Set_RayleighDampingM(0);
+    mmaterial->Set_density(1000);
 
+    ChVector<> hexpos(0, 0, 0);
+    double sx = 0.1;
+    double sy = 0.1;
+    double sz = 0.1;
+    for (int e = 0; e < 6; ++e) {
+        double angle = e * (2 * CH_C_PI / 8.0);
+        hexpos.z() = 0.3 * cos(angle);
+        hexpos.x() = 0.3 * sin(angle);
+        ChMatrix33<> hexrot(Q_from_AngAxis(angle, VECT_Y));
+
+        std::shared_ptr<ChNodeFEAxyz> hnode1_lower;
+        std::shared_ptr<ChNodeFEAxyz> hnode2_lower;
+        std::shared_ptr<ChNodeFEAxyz> hnode3_lower;
+        std::shared_ptr<ChNodeFEAxyz> hnode4_lower;
+
+        for (int ilayer = 0; ilayer < 6; ++ilayer) {
+            double hy = ilayer * sz;
+            auto hnode1 = std::make_shared<ChNodeFEAxyz>(hexpos + hexrot * ChVector<>(0, hy, 0));
+            auto hnode2 = std::make_shared<ChNodeFEAxyz>(hexpos + hexrot * ChVector<>(0, hy, sz));
+            auto hnode3 = std::make_shared<ChNodeFEAxyz>(hexpos + hexrot * ChVector<>(sx, hy, sz));
+            auto hnode4 = std::make_shared<ChNodeFEAxyz>(hexpos + hexrot * ChVector<>(sx, hy, 0));
+            my_mesh->AddNode(hnode1);
+            my_mesh->AddNode(hnode2);
+            my_mesh->AddNode(hnode3);
+            my_mesh->AddNode(hnode4);
+
+            if (ilayer > 0) {
+                auto helement1 = std::make_shared<ChElementHexa_8>();
+                helement1->SetNodes(hnode1_lower, hnode2_lower, hnode3_lower, hnode4_lower, hnode1, hnode2, hnode3,
+                                    hnode4);
+                helement1->SetMaterial(mmaterial);
+
+                my_mesh->AddElement(helement1);
+            }
+
+            hnode1_lower = hnode1;
+
+            hnode2_lower = hnode2;
+            hnode3_lower = hnode3;
+            hnode4_lower = hnode4;
+        }
+    */
+    //test visualization
+    auto mvisualizemesh = std::make_shared<ChVisualizationFEAmesh>(*(my_mesh.get()));
+    mvisualizemesh->SetFEMdataType(ChVisualizationFEAmesh::E_PLOT_NODE_SPEED_NORM);
+    mvisualizemesh->SetColorscaleMinMax(0.0, 5.50);
+    mvisualizemesh->SetShrinkElements(true, 0.85);
+    mvisualizemesh->SetSmoothFaces(true);
+    my_mesh->AddAsset(mvisualizemesh);
+
+    auto mvisualizemeshref = std::make_shared<ChVisualizationFEAmesh>(*(my_mesh.get()));
+    mvisualizemeshref->SetFEMdataType(ChVisualizationFEAmesh::E_PLOT_SURFACE);
+    mvisualizemeshref->SetWireframe(true);
+    mvisualizemeshref->SetDrawInUndeformedReference(true);
+    my_mesh->AddAsset(mvisualizemeshref);
+
+    std::shared_ptr<ChNodeFEAxyz> hnode1_lower = std::make_shared<ChNodeFEAxyz>(ChVector<>(0,0,0));
+    my_mesh->AddNode(hnode1_lower);
 
     auto mvisualizemeshC = std::make_shared<ChVisualizationFEAmesh>(*(my_mesh.get()));
     mvisualizemeshC->SetFEMglyphType(ChVisualizationFEAmesh::E_GLYPH_NODE_DOT_POS);
     mvisualizemeshC->SetFEMdataType(ChVisualizationFEAmesh::E_PLOT_NONE);
-    mvisualizemeshC->SetSymbolsThickness(0.006);
+    mvisualizemeshC->SetSymbolsThickness(1.006);
     my_mesh->AddAsset(mvisualizemeshC);
 
     //Set "UP"-direction of ChCamera
