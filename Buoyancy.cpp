@@ -70,7 +70,7 @@ loadContainer(loadContainer)
   //buoyancyCenterVizNode = std::make_shared<ChNodeFEAxyz>(ChVector<>(0,0,0));
   //mesh->AddNode(buoyancyCenterVizNode);
   // Create a sphere that will indicate buoyancy center position
-  buoyancyCenterVizSphere = std::make_shared<ChBodyEasySphere>(5,      // radius
+  buoyancyCenterVizSphere = std::make_shared<ChBodyEasySphere>(8,      // radius
                                                        8000,   // density
                                                        false,   // collide enable?
                                                        true);  // visualization?
@@ -82,7 +82,7 @@ loadContainer(loadContainer)
   mtextureball1->SetTextureFilename(GetChronoDataFile("bluwhite.png"));
   buoyancyCenterVizSphere->AddAsset(mtextureball1);
 
-  ipCenterVizSphere = std::make_shared<ChBodyEasySphere>(5,      // radius
+  ipCenterVizSphere = std::make_shared<ChBodyEasySphere>(8,      // radius
                                                        8000,   // density
                                                        false,   // collide enable?
                                                        true);  // visualization?
@@ -94,7 +94,7 @@ loadContainer(loadContainer)
   mtextureball2->SetTextureFilename(GetChronoDataFile("blu.png"));
   ipCenterVizSphere->AddAsset(mtextureball2);
 
-  topMarkerVizSphere = std::make_shared<ChBodyEasySphere>(5,      // radius
+  topMarkerVizSphere = std::make_shared<ChBodyEasySphere>(8,      // radius
                                                        8000,   // density
                                                        false,   // collide enable?
                                                        true);  // visualization?
@@ -104,7 +104,7 @@ loadContainer(loadContainer)
   // optional, attach a texture for better visualization
   topMarkerVizSphere->AddAsset(mtextureball2);
 
-  bottomMarkerVizSphere = std::make_shared<ChBodyEasySphere>(5,      // radius
+  bottomMarkerVizSphere = std::make_shared<ChBodyEasySphere>(8,      // radius
                                                        8000,   // density
                                                        false,   // collide enable?
                                                        true);  // visualization?

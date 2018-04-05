@@ -24,8 +24,10 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       monopile = std::make_shared<ChBodyEasyCylinder>(p.towerRadius,p.towerHeight,p.towerDensity);
       monopile->SetPos(monopileInitNode->GetPos());
 
-      //Rotate around x axis to align tower with z axis
+      //Rotate around x axis and y axis
       ChQuaternion<> q = Q_from_AngAxis(70 * CH_C_DEG_TO_RAD, VECT_X);
+      //ChQuaternion<> q2= Q_from_AngAxis(75 * CH_C_DEG_TO_RAD, VECT_Y);
+
       monopile->SetRot(q);
 
       system.Add(monopile);
