@@ -24,18 +24,14 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       monopile = std::make_shared<ChBodyEasyCylinder>(p.towerRadius,p.towerHeight,p.towerDensity);
       monopile->SetPos(monopileInitNode->GetPos());
 
-      //Rotate around x axis and y axis
-      ChQuaternion<> q = Q_from_AngAxis(70 * CH_C_DEG_TO_RAD, VECT_X);
-      //ChQuaternion<> q2= Q_from_AngAxis(75 * CH_C_DEG_TO_RAD, VECT_Y);
+      //Setup location of monopile for construction of mooring lines
+      ChQuaternion<> qSetup = Q_from_AngAxis(90 * CH_C_DEG_TO_RAD, VECT_X);
 
-      monopile->SetRot(q);
+      monopile->SetRot(qSetup);
 
       system.Add(monopile);
 
       //Constraints
-
-      GetLog() << "monopile initial position:" << monopile->GetPos() << "\n";
-      GetLog() << "Rest Length: " << p.mooringRestLength << "\n";
 
       //Add Buoyancy force
 
@@ -68,13 +64,28 @@ PlatformModel::PlatformModel(ChSystem& system, std::shared_ptr<ChMesh> mesh, par
       //Construct Mooring Lines
       for(int i = 0; i < p.mooringLineNr; i++){
         theta = theta + thetaInc;
-        /*
+
         GetLog() << "Mooring Line Angular position: " << theta << "deg\n";
         GetLog() << "Constructing mooring line " << i << "\n";
         MooringLine mLine(system, mesh, p, theta, monopile);
         mooringLines[i] = mLine;
-        */
+
       }
+      //Initial rotation of the monopile
+      //Rotate around x axis and y axis
+      ChQuaternion<> qRotationX = Q_from_AngAxis(0 * CH_C_DEG_TO_RAD, VECT_X);
+      ChQuaternion<> qRotationZ= Q_from_AngAxis(0 * CH_C_DEG_TO_RAD, VECT_Z);
+      //Translate to initial Position
+      //ChVector<> initPos = ChVector<>(0,0,0);
+      ChVector<> initPos = ChVector<>(20,20,0);
+
+      //Define initial displacement
+      ChCoordsys<> initCoords =ChCoordsys<>(initPos,qRotationX*qRotationZ);
+      monopile->Move(initCoords);
+
+      GetLog() << "monopile initial position:" << monopile->GetPos() << "\n";
+      GetLog() << "monopile initial rotation:" << monopile->GetRot() << "\n";
+      GetLog() << "Rest Length: " << p.mooringRestLength << "\n";
 }
 
 void PlatformModel::update(){

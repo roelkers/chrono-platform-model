@@ -18,11 +18,11 @@ params defineParameters(){
   p.mooringRaleyghDamping = 0.000;
   p.mooringNrElements = 5;
   p.mooringL = 100;
-  p.mooringPosFairleadZ = 25;
-  p.mooringPosBottomZ = 10;
+  p.mooringPosFairleadZ = 0;
+  p.mooringPosBottomZ = -100;
   double sectionLength = p.mooringL/p.mooringNrElements;
   GetLog() << "sectionLength: " << sectionLength << "\n";
-  p.mooringRestLength = sectionLength*0.9;
+  p.mooringRestLength = sectionLength*0.3;
 
   p.seaLevel = 0;
   p.rhoWater = 1000;

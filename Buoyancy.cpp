@@ -55,6 +55,8 @@ loadContainer(loadContainer)
   ChVector<> vecE = markerBottom->GetAbsCoord().pos;
   ChVector<> vecI = markerTop->GetAbsCoord().pos;
 
+  computeMaximumBuoyancyForce();
+
   //Init Buoyancy force with null vectors
   buoyancyForce = std::make_shared<ChLoadBodyForce> (
     monopile, //body
@@ -138,7 +140,7 @@ void Buoyancy::update(){
   ChQuaternion<> qcorrection = Q_from_AngAxis(-90 * CH_C_DEG_TO_RAD, VECT_X);
 
   ChQuaternion<> qcombined = qmonopile* qcorrection;
-  GetLog() << "qcombined:" << qcombined << "\n";
+  //GetLog() << "qcombined:" << qcombined << "\n";
   //Get unity vector in z direction
   ChVector<> zUnityVector = ChVector<>(0,0,1);
   //Get vector in direction of tower axis by rotating vector around quaternion
@@ -224,8 +226,9 @@ void Buoyancy::computeBuoyancy(ChVector<> vecE, ChVector<> vecI, ChVector<> inte
     //sanity check if I and E are both below Sea level
     if(vecE.z() < p.seaLevel && vecI.z() < p.seaLevel){
     //tower completely submerged, buoyancy center is same as gravity center
+    GetLog() << "completely submerged\n";
     buoyancyCenter = towerPos;
-    force = computeMaximumBuoyancyForce();
+    force = maximumBuoyancyForce;
     }
     else{
     // in this case the tower is "flying", and we should not apply any buoyancy force

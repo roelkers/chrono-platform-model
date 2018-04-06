@@ -23,6 +23,8 @@ private:
   std::shared_ptr<ChMarker> markerBottom;
   std::shared_ptr<ChMarker> markerTop;
   ChVector<> buoyancyCenter; //z-coordinate of buyoancy center of monopile from xy-plane
+  double maximumBuoyancyForce;
+
   //visualization & testing
   std::shared_ptr<ChBodyEasySphere> buoyancyCenterVizSphere;
   std::shared_ptr<ChBodyEasySphere> ipCenterVizSphere;
